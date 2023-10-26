@@ -6,8 +6,9 @@
 //
 //bool startWsa(WSADATA& wsaData);
 //bool createClientSocket(SOCKET& clientSocket);
-//bool connectSocket(SOCKET& socket, int& port);
-//bool sendData(SOCKET& socket);
+//bool sendData(SOCKET& socket, int& port);
+//bool recieveData(SOCKET& socket);
+//bool sendData(SOCKET& socket, int& port);
 //
 //int main()
 //{
@@ -17,8 +18,8 @@
 //    WSADATA wsaData;
 //    startWsa(wsaData);
 //    createClientSocket(clientSocket);
-//    connectSocket(clientSocket, port);
-//    sendData(clientSocket);
+//    sendData(clientSocket, port);
+//    recieveData(clientSocket);
 //    system("pause");
 //    WSACleanup();
 //    return 0;
@@ -39,8 +40,8 @@
 //    }
 //}
 //bool createClientSocket(SOCKET& clientSocket) {
-//    clientSocket = INVALID_SOCKET; 
-//    clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+//    clientSocket = INVALID_SOCKET;
+//    clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 //    if (clientSocket == INVALID_SOCKET) {
 //        std::cout << "Error createClientSocket" << std::endl;
 //        WSACleanup;
@@ -51,33 +52,44 @@
 //        return true;
 //    }
 //}
-//bool connectSocket(SOCKET& socket, int& port) {
+//
+//bool sendData(SOCKET& socket, int& port) {
 //    sockaddr_in service;
 //    service.sin_family = AF_INET;
 //    InetPton(AF_INET, _T("127.0.0.1"), &service.sin_addr.s_addr);
 //    service.sin_port = htons(port);
 //
-//    if (connect(socket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR) {
-//        std::cout << "Error in connect() - Failed to connect" << WSAGetLastError() << std::endl;
-//        WSACleanup;
-//        exit(EXIT_FAILURE);
+//    char buffer[200] = "P1p.H10p.m10p.s20";
+//    int bytesSent = sendto(socket,(const char*)buffer, strlen(buffer),0,(struct sockaddr*)&service, sizeof(service));
+//    if (bytesSent == -1) {
+//        std::cout << "Error sending data to server: " << WSAGetLastError() << std::endl;
+//        WSACleanup();
+//        return false;
 //    }
 //    else {
-//        std::cout << "The socket was connected ok!" << std::endl;
-//        std::cout << "Client can now start sending and reciecing data..." << std::endl;
+//        std::cout << "Data sent: " << buffer << std::endl;
+//        std::cout << "Bytes sent: " << bytesSent << std::endl;
 //        return true;
 //    }
 //}
 //
-//bool sendData(SOCKET& socket) {
-//    char buffer[200] = "Hello world from the client!";
-//    int byteCount = send(socket, buffer, 200, 0);
-//    if (byteCount == SOCKET_ERROR) {
-//        std::cout << "Error sending message from client: " << WSAGetLastError() << std::endl;
+//bool recieveData(SOCKET& socket) {
+//    char buffer[200] = "";
+//    char testing[200] = "";
+//    sockaddr_in clientAddress;
+//
+//    int clientAddress_length = (int)sizeof(clientAddress);
+//
+//    int bytes_received = recvfrom(socket, buffer, 200, 0, (struct sockaddr*)&clientAddress, &clientAddress_length);
+//    if (bytes_received < 0) {
+//        std::cout << "Error recieving datagram from client:" << std::endl;
+//        WSACleanup();
 //        return false;
 //    }
 //    else {
-//        std::cout << "Client sent bytes: " << byteCount << std::endl;
+//        std::cout << "Recieved: " << buffer << std::endl;
+//        std::cout << "Recieved: " << bytes_received << std::endl;
+//        std::cout << "Recieved: " << inet_ntop(AF_INET, &clientAddress, testing, 200) << std::endl;
 //        return true;
 //    }
 //}
